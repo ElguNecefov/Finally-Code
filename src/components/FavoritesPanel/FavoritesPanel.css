@@ -1,0 +1,17 @@
+.pnl-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.4); backdrop-filter: blur(2px); }
+.pnl { position: fixed; top: 0; right: 0; z-index: 90; height: 100%; width: 340px; max-width: 92vw; background: #fff; box-shadow: -4px 0 32px rgba(0,0,0,.12); transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+.pnl-open { transform: translateX(0); }
+.pnl-hdr { padding: 1.1rem 1.4rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.pnl-title { font-family: 'Outfit',sans-serif; font-weight: 700; font-size: 1.05rem; color: #111; }
+.pnl-close { width: 34px; height: 34px; border-radius: 9999px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #6b7280; transition: background .2s; }
+.pnl-close:hover { background: #f3f4f6; }
+.pnl-body { flex: 1; overflow-y: auto; padding: .9rem 1.4rem; display: flex; flex-direction: column; gap: .9rem; }
+.pnl-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 60px; color: #9ca3af; text-align: center; }
+.pnl-empty-ico { opacity: .22; }
+.pnl-item { display: flex; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid #f9fafb; align-items: center; }
+.pnl-thumb { width: 56px; height: 56px; border-radius: 10px; background: #f3f4f6; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.pnl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pnl-nophoto { font-size: 9px; color: #9ca3af; }
+.pnl-item-info { flex: 1; min-width: 0; }
+.pnl-item-name { font-size: .83rem; font-weight: 600; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pnl-item-price { font-family: 'Outfit',sans-serif; font-weight: 700; color: hsl(238,83%,62%); font-size: .9rem; margin-top: 4px; }
