@@ -1,51 +1,57 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react';
 
-const ShopContext = createContext({});
+export const ShopContext = createContext({});
 
 export function ShopProvider({ children }) {
-  const [favorites, setFavorites] = useState([])
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
-  const toggleFavorite = (product) => {
-    setFavorites(prev =>
-      prev.some(p => p.id === product.id)
-        ? prev.filter(p => p.id !== product.id)
-        : [...prev, product]
-    )
-  }
-
-  const isFavorite = (id) => favorites.some(p => p.id === id)
-
+  // Səbət funksiyaları
   const addToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.id === product.id)
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        )
+    setCart((prev) => {
+      const exists = prev.find(item => item.id === product.id);
+      if (exists) return prev; // Əgər artıq səbətdə varsa, təkrar əlavə etməsin
+      return [...prev, product];
+    });
+  };
+
+  const removeFromCart = (productId) => {
+    setCart((prev) => prev.filter(item => item.id !== productId));
+  };
+
+  // Favorit (Bəyənmə) funksiyaları
+  const toggleFavorite = (product) => {
+    setFavorites((prev) => {
+      const exists = prev.find(item => item.id === product.id);
+      if (exists) {
+        // Əgər artıq bəyənilibsə, siyahıdan çıxarırıq
+        return prev.filter(item => item.id !== product.id);
+      } else {
+        // Bəyənilməyibsə, siyahıya əlavə edirik
+        return [...prev, product];
       }
-      return [...prev, { ...product, quantity: 1 }]
-    })
-  }
+    });
+  };
 
-  const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id))
-
-  const updateQuantity = (id, quantity) => {
-    if (quantity <= 0) { removeFromCart(id); return }
-    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity } : item))
-  }
-
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  // ProductCard-ın axtardığı və səni yarımçıq qoyan həmin o funksiya:
+  const isFavorite = (productId) => {
+    return favorites.some(item => item.id === productId);
+  };
 
   return (
-    <ShopContext.Provider value={{ favorites, cart, cartTotal, toggleFavorite, isFavorite, addToCart, removeFromCart, updateQuantity }}>
+    <ShopContext.Provider value={{ 
+      cart, 
+      favorites, 
+      addToCart, 
+      removeFromCart, 
+      toggleFavorite, 
+      isFavorite // ProductCard artıq bu funksiyanı problemsiz tapacaq!
+    }}>
       {children}
     </ShopContext.Provider>
-  )
+  );
 }
 
 export function useShop() {
-  const ctx = useContext(ShopContext)
-  if (!ctx) throw new Error('useShop must be used within ShopProvider')
-  return ctx
+  return useContext(ShopContext);
 }
