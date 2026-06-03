@@ -1,9 +1,0 @@
-.hero { position: relative; background: #0f0f13; color: #fff; padding: 5rem 1rem; overflow: hidden; text-align: center; }
-.hero-bg { position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1600&q=60') center/cover; opacity: .1; }
-.hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
-.hero-badge { padding: 5px 16px; border-radius: 9999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); font-size: .82rem; font-weight: 500; backdrop-filter: blur(8px); margin-bottom: 1.5rem; color: #d1d5db; }
-.hero-h1 { font-family: 'Outfit',sans-serif; font-size: clamp(2rem,5vw,3.25rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.25rem; letter-spacing: -.03em; }
-.hero-sub { font-size: 1.05rem; color: #9ca3af; max-width: 540px; line-height: 1.7; margin-bottom: 2.5rem; }
-.hero-feats { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.25rem 2rem; font-size: .88rem; font-weight: 500; color: #d1d5db; }
-.hero-feat { display: flex; align-items: center; gap: 7px; }
-.hf-ico { color: hsl(238,83%,62%); }

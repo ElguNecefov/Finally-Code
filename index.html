@@ -1,34 +1,186 @@
-<!-- <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="az">
+
 <head>
-  <script type="module">
-    import RefreshRuntime from "/@react-refresh"
-    RefreshRuntime.injectIntoGlobalHook(window)
-    window.$RefreshReg$ = () => {}
-    window.$RefreshSig$ = () => (type) => type
-    window.__vite_plugin_react_preamble_installed__ = true
-  </script>
-  
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Final Layihə</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GadgetBazar - Texnologiya Bazarı</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">G</div>
+          <span class="logo-text">GadgetBazar</span>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Məhsul axtarın...">
+          <button id="searchBtn">Axtar</button>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+          </button>
+          <button class="icon-btn" id="favoritesBtn">
+            <i class="fas fa-heart"></i>
+            <span class="badge" id="favoritesCount">0</span>
+          </button>
+          <button class="icon-btn" id="cartBtn">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="badge" id="cartCount">0</span>
+          </button>
+          <button class="sell-btn">İndi Sat</button>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="categories">
+        <button class="category-btn active" data-category="all">Hamısı</button>
+        <button class="category-btn" data-category="smartphones">Smartfonlar</button>
+        <button class="category-btn" data-category="smartwatches">Smart saatlar</button>
+        <button class="category-btn" data-category="notebooks">Noutbuklar</button>
+        <button class="category-btn" data-category="tablets">Planşetlər</button>
+        <button class="category-btn" data-category="audio">Audio</button>
+        <button class="category-btn" data-category="cameras">Kameralar</button>
+        <button class="category-btn" data-category="games">Oyun</button>
+        <button class="category-btn" data-category="accessories">Aksesuarlar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Products Section -->
+      <div id="productsSection" class="section active">
+        <div class="products-count" id="productsCount">34 məhsul tapıldı</div>
+        <div id="productsContainer" class="products-grid"></div>
+      </div>
+
+      <!-- Favorites Section -->
+      <div id="favoritesSection" class="section hidden">
+        <button class="back-btn" id="backToProducts">
+          <i class="fas fa-arrow-left"></i> Geri
+        </button>
+        <h2 class="section-title">Bəyəndiklərim</h2>
+        <div class="products-count" id="favoritesCountText">0 məhsul tapıldı</div>
+        <div class="products-grid" id="favoritesGrid">
+          <!-- Favorites will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Cart Section -->
+      <div id="cartSection" class="section hidden">
+        <button class="back-btn" id="backToProductsCart">
+          <i class="fas fa-arrow-left"></i> Geri
+        </button>
+        <h2 class="section-title">Səbət</h2>
+        <div class="cart-content">
+          <div class="cart-items" id="cartItems">
+            <!-- Cart items will be loaded here -->
+          </div>
+          <div class="cart-summary">
+            <h3>Sifariş məlumatları</h3>
+            <div class="summary-row">
+              <span>Məhsul sayı:</span>
+              <span id="cartItemCount">0</span>
+            </div>
+            <div class="summary-row">
+              <span>Ümumi məbləğ:</span>
+              <span id="cartTotalAmount">0₼</span>
+            </div>
+            <div class="summary-row total">
+              <span>Cəmi:</span>
+              <span id="cartTotal">0₼</span>
+            </div>
+            <button class="checkout-btn">Sifarişi tamamla</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Product Modal -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-body">
+        <div class="modal-images">
+          <div class="main-image">
+            <img id="modalImage" src="" alt="">
+          </div>
+          <div class="thumbnail-images" id="thumbnailImages">
+            <!-- Thumbnails will be loaded here -->
+          </div>
+        </div>
+        <div class="modal-info">
+          <div class="modal-header">
+            <h2 id="modalTitle"></h2>
+            <button class="favorite-btn" id="modalFavoriteBtn">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="modal-rating">
+            <span class="stars" id="modalStars"></span>
+            <span class="rating-count" id="modalRatingCount"></span>
+            <span class="location" id="modalLocation"></span>
+          </div>
+          <div class="modal-price">
+            <span class="current-price" id="modalPrice"></span>
+            <span class="old-price" id="modalOldPrice"></span>
+            <span class="discount" id="modalDiscount"></span>
+          </div>
+          <div class="modal-description">
+            <h3>Məhsul haqqında</h3>
+            <p id="modalDescription"></p>
+          </div>
+          <div class="modal-features">
+            <div class="feature">
+              <i class="fas fa-shield-alt"></i>
+              <div>
+                <h4>Alıcı Müdafiəsi</h4>
+                <p>Məhsul təsvirə uyğun deyilsə, tam geri ödəmə. Əmin olun.</p>
+              </div>
+            </div>
+            <div class="feature">
+              <i class="fas fa-truck"></i>
+              <div>
+                <h4>Sürətli Çatdırılma</h4>
+                <p>50₼-dən yuxarı sifarişlərdə pulsuz çatdırılma. Real vaxt izləmə.</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-details">
+            <div class="detail-row">
+              <span>Brend</span>
+              <strong id="modalBrand"></strong>
+            </div>
+            <div class="detail-row">
+              <span>Kateqoriya</span>
+              <strong id="modalCategory"></strong>
+            </div>
+            <div class="detail-row">
+              <span>Stok</span>
+              <strong id="modalStock"></strong>
+            </div>
+          </div>
+          <button class="add-to-cart-btn" id="addToCartBtn">Səbətə əlavə et</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+</body>
+<script app.js></script>
 </html>

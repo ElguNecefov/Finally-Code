@@ -1,7 +1,0 @@
-.catbar { position: sticky; top: 64px; z-index: 40; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-bottom: 1px solid #e5e7eb; padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-.catbar-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-.catbar-inner::-webkit-scrollbar { display: none; }
-.catpill { padding: 8px 20px; border-radius: 9999px; border: none; font-size: .875rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all .2s; background: #f3f4f6; color: #4b5563; font-family: 'Inter',sans-serif; }
-.catpill:hover { background: #e5e7eb; color: #111; }
-.catpill-on { background: #111; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
-.catpill-on:hover { background: #222; }
