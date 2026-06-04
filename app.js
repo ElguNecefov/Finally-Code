@@ -1,4 +1,4 @@
-// API Configuration - YENİ AMAZON API
+// YENİ AMAZON API
 const API_URL = 'https://real-time-amazon-data.p.rapidapi.com/search';
 const API_KEY = 'b7e96e01dfmsh95f55f53c831621p1f1819jsn3679d2c185d1';
 const API_HOST = 'real-time-amazon-data.p.rapidapi.com';
@@ -10,7 +10,7 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let currentCategory = 'all';
 let currentProduct = null;
 
-// DOM Elements
+// DOM Elementler
 const productsGrid = document.getElementById('productsContainer');
 const favoritesGrid = document.getElementById('favoritesGrid');
 const cartItems = document.getElementById('cartItems');
@@ -28,7 +28,7 @@ const productModal = document.getElementById('productModal');
 const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
 
-// Initialize
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchProducts();
     updateCounts();
@@ -49,7 +49,7 @@ async function fetchProducts(search = '', category = 'all') {
     productsGrid.innerHTML = '<div class="loading">Məhsullar yüklənir...</div>';
     
     try {
-        // Map categories to search terms
+        // Map categories to search 
         const categoryMap = {
             'all': 'electronics',
             'smartphones': 'smartphone iphone samsung galaxy',
@@ -138,7 +138,7 @@ async function fetchProducts(search = '', category = 'all') {
     console.log('=== fetchProducts bitdi ===');
 }
 
-// Köməkçi funksiyalar
+
 function extractBrand(title) {
     if (!title) return 'Unknown';
     const brands = ['Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Xiaomi', 'Huawei', 'Oppo', 'Realme', 'Google', 'Microsoft', 'Amazon', 'Canon', 'Nikon'];
@@ -233,4 +233,43 @@ function displayProducts(productsToDisplay) {
     });
     
     console.log('=== displayProducts bitdi ===');
+}
+
+function createProductCard(product) {
+    const isFavorite = favorites.includes(product.id);
+    const oldPrice = product.oldPrice || (product.price * 1.2).toFixed(2);
+    const discount = product.discount || Math.round(((oldPrice - product.price) / oldPrice) * 100);
+    
+    return `
+        <div class="product-card" data-id="${product.id}">
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+                <span class="badge-new">Təzə</span>
+                <button class="favorite-btn-card ${isFavorite ? 'active' : ''}" data-id="${product.id}">
+                    <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+                </button>
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">${product.name}</h3>
+                <div class="product-meta">
+                    <span class="brand">
+                        <span class="brand-dot"></span>
+                        ${product.brand}
+                    </span>
+                    <span class="rating">
+                        <i class="fas fa-star"></i>
+                        ${product.rating}
+                    </span>
+                    <span class="rating-count">(${product.ratingCount})</span>
+                </div>
+                <div class="location">
+                    <i class="fas fa-map-marker-alt"></i> ${product.location}
+                </div>
+                <div class="product-footer">
+                    <div class="price">${product.price.toFixed(2)}₼</div>
+                    <button class="view-btn" data-id="${product.id}">Bax</button>
+                </div>
+            </div>
+        </div>
+    `;
 }
