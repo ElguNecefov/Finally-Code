@@ -179,3 +179,215 @@ function displayProducts(list) {
     document.querySelectorAll('.product-card').forEach(c => c.onclick = () => openModal(parseInt(c.dataset.id)));
 }
 
+function openModal(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    currentProduct = p;
+
+    modalImage.src = p.image;
+    modalTitle.textContent = p.name;
+    modalStars.innerHTML = '★'.repeat(Math.floor(p.rating)) + '☆'.repeat(5 - Math.floor(p.rating));
+    modalRatingCount.textContent = `(${p.ratingCount})`;
+    modalLocation.textContent = p.location;
+    modalPrice.textContent = `${p.price}₼`;
+    modalOldPrice.textContent = `${p.oldPrice}₼`;
+    modalDiscount.textContent = `-${p.discount}%`;
+    modalDescription.textContent = p.description;
+    modalBrand.textContent = p.brand;
+    modalCategory.textContent = p.category;
+    modalStock.textContent = `${p.stock} ədəd`;
+
+    const favBtn = document.getElementById('modalFavoriteBtn');
+    favBtn.className = `favorite-btn ${favorites.includes(p.id) ? 'active' : ''}`;
+    favBtn.innerHTML = `<i class="${favorites.includes(p.id) ? 'fas' : 'far'} fa-heart"></i>`;
+
+    thumbnailImages.innerHTML = p.images.map((img, i) => `<div class="thumbnail ${i === 0 ? 'active' : ''}"><img src="${img}"></div>`).join('');
+    productModal.classList.add('active');
+}
+
+function toggleFav(id) {
+    const i = favorites.indexOf(id);
+    if (i > -1) {
+        favorites.splice(i, 1);
+        showToast('Silindi');
+    } else {
+        favorites.push(id);
+        showToast('Əlavə edildi');
+    }
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    
+    
+    const favCountEl = document.getElementById('favoritesCount');
+    if (favCountEl) {
+        favCountEl.textContent = favorites.length;
+    }
+    
+
+    const modalFavBtn = document.getElementById('modalFavoriteBtn');
+    if (modalFavBtn && currentProduct && currentProduct.id === id) {
+        const isFav = favorites.includes(id);
+        modalFavBtn.className = `favorite-btn ${isFav ? 'active' : ''}`;
+        modalFavBtn.innerHTML = `<i class="${isFav ? 'fas' : 'far'} fa-heart"></i>`;
+    }
+    
+    
+    displayProducts(products);
+    if (favoritesSection.classList.contains('active')) {
+        displayFavorites();
+    }
+}
+function displayFavorites() {
+    const fav = products.filter(p => favorites.includes(p.id));
+    if (!fav.length) {
+        favoritesGrid.innerHTML = '<div class="empty-state"><i class="far fa-heart"></i><p>Boşdur</p></div>';
+        favoritesCountText.textContent = '0 məhsul';
+    } else {
+        favoritesGrid.innerHTML = fav.map(p => `
+            <div class="product-card" data-id="${p.id}">
+                <div class="product-image">
+                    <img src="${p.image}">
+                    <button class="favorite-btn-card active" data-id="${p.id}">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">${p.name}</h3>
+                    <div class="price">${p.price}₼</div>
+                    <button class="view-btn" data-id="${p.id}">Bax</button>
+                </div>
+            </div>
+        `).join('');
+        favoritesCountText.textContent = `${fav.length} məhsul`;
+
+        
+        document.querySelectorAll('#favoritesGrid .view-btn').forEach(b => {
+            b.onclick = () => openModal(parseInt(b.dataset.id));
+        });
+        document.querySelectorAll('#favoritesGrid .favorite-btn-card').forEach(b => {
+            b.onclick = (e) => { e.stopPropagation(); toggleFav(parseInt(b.dataset.id)); };
+        });
+    }
+}
+function addToCart(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    const item = cart.find(x => x.id === id);
+    if (item) item.quantity++;
+    else cart.push({ id: p.id, name: p.name, brand: p.brand, price: p.price, image: p.image, quantity: 1 });
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCounts();
+    showToast('Səbətə əlavə edildi');
+    if (cartSection.classList.contains('active')) displayCart();
+}
+
+function updateQty(id, change) {
+    const item = cart.find(x => x.id === id);
+    if (!item) return;
+    const newQty = item.quantity + change;
+    if (newQty < 1) return;
+    item.quantity = newQty;
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCounts();
+    displayCart();
+}
+
+function removeFromCart(id) {
+    cart = cart.filter(x => x.id !== id);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCounts();
+    displayCart();
+    showToast('Silindi');
+}
+
+function displayCart() {
+    if (!cart.length) {
+        cartItems.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><p>Boşdur</p></div>';
+        cartItemCount.textContent = '0';
+        cartTotalAmount.textContent = '0₼';
+        cartTotal.textContent = '0₼';
+        return;
+    }
+
+    cartItems.innerHTML = cart.map(item => `
+        <div class="cart-item">
+            <div class="cart-item-image"><img src="${item.image}"></div>
+            <div class="cart-item-info">
+                <div class="cart-item-title">${item.name}</div>
+                <div class="cart-item-brand">${item.brand}</div>
+                <div class="cart-item-price">${item.price}₼</div>
+            </div>
+            <div class="cart-item-controls">
+                <div class="quantity-control">
+                    <button class="quantity-btn" onclick="updateQty(${item.id}, -1)" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
+                    <span class="quantity">${item.quantity}</span>
+                    <button class="quantity-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                </div>
+                <button class="remove-btn" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>
+    `).join('');
+
+    const total = cart.reduce((s, i) => s + i.quantity, 0);
+    const amount = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    cartItemCount.textContent = total;
+    cartTotalAmount.textContent = `${amount.toFixed(2)}₼`;
+    cartTotal.textContent = `${amount.toFixed(2)}₼`;
+}
+
+function updateCounts() {
+    const favCount = document.getElementById('favoritesCount');
+    const cartCountEl = document.getElementById('cartCount');
+
+    if (favCount) {
+        favCount.textContent = favorites.length;
+    }
+
+    if (cartCountEl) {
+        const total = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+        cartCountEl.textContent = total;
+    }
+}
+
+function showToast(msg) {
+    toastMessage.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+}
+
+function showSection(s) {
+    productsSection.classList.remove('active');
+    favoritesSection.classList.remove('active');
+    cartSection.classList.remove('active');
+    if (s === 'products') productsSection.classList.add('active');
+    else if (s === 'favorites') { favoritesSection.classList.add('active'); displayFavorites(); }
+    else if (s === 'cart') { cartSection.classList.add('active'); displayCart(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setupEvents() {
+    searchBtn.onclick = () => {
+        const q = searchInput.value.trim();
+        if (q) { currentCategory = 'all'; categoryBtns.forEach(b => b.classList.toggle('active', b.dataset.category === 'all')); fetchProducts(q); }
+    };
+
+    categoryBtns.forEach(b => b.onclick = () => {
+        currentCategory = b.dataset.category;
+        categoryBtns.forEach(x => x.classList.toggle('active', x === b));
+        searchInput.value = '';
+        fetchProducts('', currentCategory);
+    });
+
+    favoritesBtn.onclick = () => showSection('favorites');
+    cartBtn.onclick = () => showSection('cart');
+    backToProducts.onclick = () => showSection('products');
+    backToProductsCart.onclick = () => showSection('products');
+    modalClose.onclick = () => { productModal.classList.remove('active'); currentProduct = null; };
+    modalFavoriteBtn.onclick = () => { if (currentProduct) toggleFav(currentProduct.id); };
+    addToCartBtn.onclick = () => { if (currentProduct) addToCart(currentProduct.id); };
+    productModal.onclick = (e) => { if (e.target === productModal) { productModal.classList.remove('active'); currentProduct = null; } };
+    document.onkeydown = (e) => { if (e.key === 'Escape' && productModal.classList.contains('active')) { productModal.classList.remove('active'); currentProduct = null; } };
+    document.querySelector('.checkout-btn').onclick = () => showToast('Tezliklə');
+}
+
+window.updateQty = updateQty;
+window.removeFromCart = removeFromCart;
