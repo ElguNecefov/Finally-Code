@@ -1,16 +1,29 @@
-// YENİ AMAZON API
-const API_URL = 'https://real-time-amazon-data.p.rapidapi.com/search';
-const API_KEY = 'b7e96e01dfmsh95f55f53c831621p1f1819jsn3679d2c185d1';
-const API_HOST = 'real-time-amazon-data.p.rapidapi.com';
+const API = 'https://dummyjson.com/products';
+const cache = {};
 
-// State
 let products = [];
-let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-let currentCategory = 'all';
-let currentProduct = null;
 
-// DOM Elementler
+let favorites = [];
+let cart = [];
+
+try {
+    const savedFavorites = localStorage.getItem('favorites');
+    if (savedFavorites) {
+        const parsed = JSON.parse(savedFavorites);
+        favorites = Array.isArray(parsed) ? parsed : [];
+    }
+
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        cart = Array.isArray(parsed) ? parsed : [];
+    }
+} catch (e) {
+    console.error('localStorage xətası:', e);
+    favorites = [];
+    cart = [];
+}
+
 const productsGrid = document.getElementById('productsContainer');
 const favoritesGrid = document.getElementById('favoritesGrid');
 const cartItems = document.getElementById('cartItems');
@@ -28,248 +41,141 @@ const productModal = document.getElementById('productModal');
 const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    fetchProducts();
     updateCounts();
-    setupEventListeners();
+    loadAllCategories();
+    setupEvents();
 });
 
-// Fetch Products from Amazon API
-async function fetchProducts(search = '', category = 'all') {
-    console.log('=== fetchProducts başladı ===');
-    console.log('Search:', search);
-    console.log('Category:', category);
-    
-    if (!productsGrid) {
-        console.error('❌ productsGrid tapılmadı!');
-        return;
+async function loadAllCategories() {
+    try {
+        const [p, l, t, a, mw, ww] = await Promise.all([
+            fetch(`${API}/category/smartphones?limit=50`),
+            fetch(`${API}/category/laptops?limit=50`),
+            fetch(`${API}/category/tablets?limit=50`),
+            fetch(`${API}/category/mobile-accessories?limit=50`),
+            fetch(`${API}/category/mens-watches?limit=50`),
+            fetch(`${API}/category/womens-watches?limit=50`)
+        ]);
+
+        const [pd, ld, td, ad, mwd, wwd] = await Promise.all([p.json(), l.json(), t.json(), a.json(), mw.json(), ww.json()]);
+
+        const audioKw = ['airpod', 'beats', 'earphone', 'headphone', 'echo', 'homepod', 'speaker'];
+        const accKw = ['charger', 'case', 'battery', 'cable', 'monopod', 'selfie', 'magSafe'];
+
+        const accs = ad.products || [];
+        const audio = accs.filter(p => audioKw.some(k => p.title?.toLowerCase().includes(k)));
+        const accessories = accs.filter(p => {
+            const t = p.title?.toLowerCase() || '';
+            return accKw.some(k => t.includes(k)) && !audioKw.some(k => t.includes(k));
+        });
+        const watches = [...(mwd.products || []), ...(wwd.products || []), ...accs.filter(p => p.title?.toLowerCase().includes('watch'))];
+
+        cache.smartphones = pd.products || [];
+        cache.notebooks = ld.products || [];
+        cache.tablets = td.products || [];
+        cache.audio = audio;
+        cache.accessories = accessories;
+        cache.watches = watches;
+        cache.all = [...cache.smartphones, ...cache.notebooks, ...cache.tablets, ...audio, ...accessories, ...watches];
+
+        fetchProducts('', 'all');
+    } catch (e) {
+        productsGrid.innerHTML = `<div class="error">Xəta: ${e.message}</div>`;
     }
     
-    productsGrid.innerHTML = '<div class="loading">Məhsullar yüklənir...</div>';
-    
-    try {
-        // Map categories to search 
-        const categoryMap = {
-            'all': 'electronics',
-            'smartphones': 'smartphone iphone samsung galaxy',
-            'smartwatches': 'smartwatch apple watch fitness',
-            'notebooks': 'laptop macbook notebook computer',
-            'tablets': 'tablet ipad samsung tab',
-            'audio': 'airpods headphones earbuds speaker',
-            'cameras': 'camera canon nikon dslr',
-            'games': 'gaming playstation xbox console',
-            'accessories': 'charger case cable accessory'
-        };
-        
-        const query = search || categoryMap[category] || 'electronics';
-        const url = `${API_URL}?query=${encodeURIComponent(query)}&page=1&country=US&sort_by=RELEVANCE&product_condition=ALL&is_prime=false&deals_and_discounts=NONE`;
-        
-        console.log('📡 API URL:', url);
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-RapidAPI-Key': API_KEY,
-                'X-RapidAPI-Host': API_HOST
+    favorites = favorites.filter(id => products.some(p => p.id === id));
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    updateCounts();
+}
+
+async function fetchProducts(query = '', category = 'all') {
+    productsGrid.innerHTML = '<div class="loading"></div>';
+
+    let base = [];
+    if (query) {
+        const q = query.toLowerCase();
+        base = (cache.all || []).filter(p => p.title?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q));
+    } else if (category !== 'all' && cache[category]) {
+        base = cache[category];
+    } else {
+        base = cache.all || [];
+    }
+
+    if (!base.length) {
+    productsGrid.innerHTML = '<div class="error">Məhsul tapılmadı</div>';
+    productsCount.textContent = '0 məhsul';  
+    return;
+}
+
+    let final = [];
+    if (category === 'all' || query) {
+        final = base.map(p => format(p, p.id));
+    } else {
+        const colors = ['Black', 'White', 'Silver', 'Gold', 'Blue'];
+        const storages = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+        base.forEach(p => {
+            const count = Math.floor(Math.random() * 2) + 2;
+            for (let i = 0; i < count; i++) {
+                const c = colors[Math.floor(Math.random() * colors.length)];
+                const s = storages[Math.floor(Math.random() * storages.length)];
+                final.push(format(p, p.id * 100 + i, `${p.title} - ${c} ${s}`));
             }
         });
-        
-        console.log('📥 Response status:', response.status);
-        console.log('📥 Response ok:', response.ok);
-        
-        if (!response.ok) {
-            throw new Error(`API xətası: ${response.status} - ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('📦 API cavabı (tam):', data);
-        console.log('📦 data.data:', data.data);
-        
-        if (data.data) {
-            console.log('📦 data.data.products:', data.data.products);
-            console.log('📦 Məhsul sayı:', data.data.products ? data.data.products.length : 0);
-        }
-        
-        if (data.data && data.data.products && data.data.products.length > 0) {
-            console.log('✅ Məhsullar tapıldı:', data.data.products.length);
-            
-            // Transform Amazon API data to our format
-            products = data.data.products.map((product, index) => {
-                console.log(`Məhsul ${index + 1}:`, product);
-                return {
-                    id: product.asin || (Date.now() + index),
-                    name: product.product_title || 'Məhsul',
-                    brand: extractBrand(product.product_title) || 'Unknown',
-                    price: parsePrice(product.product_price),
-                    oldPrice: parsePrice(product.product_price) * 1.2,
-                    discount: 15,
-                    image: product.product_photo || 'https://via.placeholder.com/400x400',
-                    images: [product.product_photo || 'https://via.placeholder.com/400x400'],
-                    rating: (Math.random() * 2 + 3).toFixed(1),
-                    ratingCount: Math.floor(Math.random() * 100) + 10,
-                    location: 'Bakı, Azərbaycan',
-                    description: product.product_title || 'Bu məhsul haqqında ətraflı məlumat tezliklə əlavə olunacaq.',
-                    category: category === 'all' ? getRandomCategory() : category,
-                    stock: Math.floor(Math.random() * 50) + 1
-                };
-            });
-            
-            console.log('✅ Transformasiya olundu:', products.length, 'məhsul');
-            console.log('✅ İlk məhsul:', products[0]);
-            
-            displayProducts(products);
-            updateProductsCount(products.length);
-            console.log('✅ displayProducts çağrıldı');
-            
-        } else {
-            console.warn('⚠️ Məhsul tapılmadı');
-            productsGrid.innerHTML = '<div class="error">Məhsul tapılmadı</div>';
-            updateProductsCount(0);
-        }
-        
-    } catch (error) {
-        console.error('❌ XƏTA:', error);
-        console.error('❌ Xəta mesajı:', error.message);
-        productsGrid.innerHTML = `<div class="error">Xəta baş verdi: ${error.message}</div>`;
-        updateProductsCount(0);
+        final.sort(() => Math.random() - 0.5);
     }
-    
-    console.log('=== fetchProducts bitdi ===');
+
+    products = final;
+    displayProducts(products);
+    productsCount.textContent = `${products.length} məhsul`;
 }
 
+function format(p, id, name = null) {
+    const price = p.price || 100;
+    const discount = p.discountPercentage || Math.floor(Math.random() * 30) + 5;
+    const images = p.images?.length ? p.images : [p.thumbnail || 'https://via.placeholder.com/400'];
 
-function extractBrand(title) {
-    if (!title) return 'Unknown';
-    const brands = ['Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Xiaomi', 'Huawei', 'Oppo', 'Realme', 'Google', 'Microsoft', 'Amazon', 'Canon', 'Nikon'];
-    for (let brand of brands) {
-        if (title.toLowerCase().includes(brand.toLowerCase())) {
-            return brand;
-        }
-    }
-    return title.split(' ')[0];
+    return {
+        id, name: name || p.title, brand: p.brand || 'Unknown',
+        price: (price * (1 - discount / 100)).toFixed(2),
+        oldPrice: price, discount: Math.round(discount),
+        image: p.thumbnail || images[0], images,
+        rating: p.rating || (Math.random() * 2 + 3).toFixed(1),
+        ratingCount: Math.floor(Math.random() * 500) + 50,
+        description: p.description || 'Məhsul haqqında',
+        category: p.category || 'electronics',
+        location: 'Bakı', stock: p.stock || Math.floor(Math.random() * 30) + 1
+    };
 }
 
-function parsePrice(priceStr) {
-    if (!priceStr) return Math.floor(Math.random() * 1000) + 100;
-    const match = priceStr.toString().match(/[\d.]+/);
-    return match ? parseFloat(match[0]) : Math.floor(Math.random() * 1000) + 100;
-}
-
-function getRandomCategory() {
-    const categories = ['smartphones', 'notebooks', 'tablets', 'audio', 'smartwatches', 'accessories'];
-    return categories[Math.floor(Math.random() * categories.length)];
-}
-
-function showLoading() {
-    productsGrid.innerHTML = '<div class="loading"></div>';
-}
-
-function displayProducts(productsToDisplay) {
-    console.log('=== displayProducts başladı ===');
-    console.log('Göstəriləcək məhsul sayı:', productsToDisplay.length);
-    console.log('productsGrid:', productsGrid);
-    
-    if (!productsGrid) {
-        console.error('❌ productsGrid elementi tapılmadı!');
-        return;
-    }
-    
-    if (!productsToDisplay || productsToDisplay.length === 0) {
-        console.warn('⚠️ Məhsul yoxdur');
-        productsGrid.innerHTML = '<div class="error">Məhsul tapılmadı</div>';
-        return;
-    }
-    
-    console.log('🎨 Məhsul kartları yaradılır...');
-    
-    const html = productsToDisplay.map(product => {
-        console.log('Kart yaradılır:', product.name);
-        return createProductCard(product);
-    }).join('');
-    
-    console.log('📝 HTML uzunluğu:', html.length);
-    console.log('📝 HTML nümunəsi:', html.substring(0, 200));
-    
-    productsGrid.innerHTML = html;
-    
-    console.log('✅ innerHTML təyin olundu');
-    console.log('productsGrid.innerHTML uzunluğu:', productsGrid.innerHTML.length);
-    
-    // Add event listeners
-    const viewBtns = document.querySelectorAll('.view-btn');
-    console.log('View düymələri sayı:', viewBtns.length);
-    
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const productId = btn.dataset.id;
-            console.log('View clicked:', productId);
-            openProductModal(productId);
-        });
-    });
-    
-    const favBtns = document.querySelectorAll('.favorite-btn-card');
-    console.log('Favorite düymələri sayı:', favBtns.length);
-    
-    favBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const productId = btn.dataset.id;
-            console.log('Favorite clicked:', productId);
-            toggleFavorite(productId);
-        });
-    });
-    
-    const cards = document.querySelectorAll('.product-card');
-    console.log('Məhsul kartları sayı:', cards.length);
-    
-    cards.forEach(card => {
-        card.addEventListener('click', () => {
-            const productId = card.dataset.id;
-            console.log('Card clicked:', productId);
-            openProductModal(productId);
-        });
-    });
-    
-    console.log('=== displayProducts bitdi ===');
-}
-
-function createProductCard(product) {
-    const isFavorite = favorites.includes(product.id);
-    const oldPrice = product.oldPrice || (product.price * 1.2).toFixed(2);
-    const discount = product.discount || Math.round(((oldPrice - product.price) / oldPrice) * 100);
-    
-    return `
-        <div class="product-card" data-id="${product.id}">
+function displayProducts(list) {
+    productsGrid.innerHTML = list.map(p => `
+        <div class="product-card" data-id="${p.id}">
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
-                <span class="badge-new">Təzə</span>
-                <button class="favorite-btn-card ${isFavorite ? 'active' : ''}" data-id="${product.id}">
-                    <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+                <img src="${p.image}" alt="${p.name}">
+                ${p.discount ? `<span class="discount-badge">-${p.discount}%</span>` : ''}
+                <button class="favorite-btn-card ${favorites.includes(p.id) ? 'active' : ''}" data-id="${p.id}">
+                    <i class="${favorites.includes(p.id) ? 'fas' : 'far'} fa-heart"></i>
                 </button>
             </div>
             <div class="product-info">
-                <h3 class="product-title">${product.name}</h3>
+                <h3 class="product-title">${p.name}</h3>
                 <div class="product-meta">
-                    <span class="brand">
-                        <span class="brand-dot"></span>
-                        ${product.brand}
-                    </span>
-                    <span class="rating">
-                        <i class="fas fa-star"></i>
-                        ${product.rating}
-                    </span>
-                    <span class="rating-count">(${product.ratingCount})</span>
+                    <span class="brand"><span class="brand-dot"></span>${p.brand}</span>
+                    <span class="rating"><i class="fas fa-star"></i>${p.rating}</span>
+                    <span class="rating-count">(${p.ratingCount})</span>
                 </div>
-                <div class="location">
-                    <i class="fas fa-map-marker-alt"></i> ${product.location}
-                </div>
+                <div class="location"><i class="fas fa-map-marker-alt"></i>${p.location}</div>
                 <div class="product-footer">
-                    <div class="price">${product.price.toFixed(2)}₼</div>
-                    <button class="view-btn" data-id="${product.id}">Bax</button>
+                    <div class="price">${p.price}₼</div>
+                    <button class="view-btn" data-id="${p.id}">Bax</button>
                 </div>
             </div>
         </div>
-    `;
+    `).join('');
+
+    document.querySelectorAll('.view-btn').forEach(b => b.onclick = () => openModal(parseInt(b.dataset.id)));
+    document.querySelectorAll('.favorite-btn-card').forEach(b => b.onclick = (e) => { e.stopPropagation(); toggleFav(parseInt(b.dataset.id)); });
+    document.querySelectorAll('.product-card').forEach(c => c.onclick = () => openModal(parseInt(c.dataset.id)));
 }
+

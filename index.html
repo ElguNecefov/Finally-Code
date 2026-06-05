@@ -1,33 +1,26 @@
 <!DOCTYPE html>
 <html lang="az">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GadgetBazar - Texnologiya Bazarı</title>
+  <title>TecHome</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
-  <!-- Header -->
   <header class="header">
     <div class="container">
       <div class="header-content">
         <div class="logo">
-          <div class="logo-icon">G</div>
-          <span class="logo-text">GadgetBazar</span>
+          <div class="logo-icon">TH</div>
+          <span class="logo-text">TecHome</span>
         </div>
-
         <div class="search-box">
           <input type="text" id="searchInput" placeholder="Məhsul axtarın...">
-          <button id="searchBtn">Axtar</button>
+          <button id="searchBtn" class="search-btn">Axtar</button>
         </div>
-
-       <div class="header-actions">
-          <button class="icon-btn" id="notificationBtn">
-            <i class="fas fa-bell"></i>
-          </button>
+        <div class="header-actions">
+          <button class="icon-btn" id="notificationBtn"><i class="fas fa-bell"></i></button>
           <button class="icon-btn" id="favoritesBtn">
             <i class="fas fa-heart"></i>
             <span class="badge" id="favoritesCount">0</span>
@@ -37,65 +30,44 @@
             <span class="badge" id="cartCount">0</span>
           </button>
           <button class="sell-btn">İndi Sat</button>
-        </div> 
+        </div>
       </div>
-
-      <!-- Kateqoriyalar -->
       <div class="categories">
         <button class="category-btn active" data-category="all">Hamısı</button>
         <button class="category-btn" data-category="smartphones">Smartfonlar</button>
-        <button class="category-btn" data-category="smartwatches">Smart saatlar</button>
-        <button class="category-btn" data-category="notebooks">Noutbuklar</button>
+        <button class="category-btn" data-category="notebooks">Notebooklar</button>
         <button class="category-btn" data-category="tablets">Planşetlər</button>
         <button class="category-btn" data-category="audio">Audio</button>
-        <button class="category-btn" data-category="cameras">Kameralar</button>
-        <button class="category-btn" data-category="games">Oyun</button>
         <button class="category-btn" data-category="accessories">Aksesuarlar</button>
+        <button class="category-btn" data-category="watches">Saatlar</button>
       </div>
     </div>
   </header>
 
-  <!-- Main -->
   <main class="main-content">
     <div class="container">
-      <!-- Products Section -->
       <div id="productsSection" class="section active">
-        <div class="products-count" id="productsCount">34 məhsul tapıldı</div>
+        <div class="products-count" id="productsCount">0 məhsul</div>
         <div id="productsContainer" class="products-grid"></div>
       </div>
 
-      <!-- Favorites -->
-      <div id="favoritesSection" class="section hidden">
-        <button class="back-btn" id="backToProducts">
-          <i class="fas fa-arrow-left"></i> Geri
-        </button>
+      <div id="favoritesSection" class="section">
+        <button class="back-btn" id="backToProducts"><i class="fas fa-arrow-left"></i> Geri</button>
         <h2 class="section-title">Bəyəndiklərim</h2>
-        <div class="products-count" id="favoritesCountText">0 məhsul tapıldı</div>
-        <div class="products-grid" id="favoritesGrid"></div>
+        <div class="products-count" id="favoritesCountText">0 məhsul</div>
+        <div id="favoritesGrid" class="products-grid"></div>
       </div>
 
-      <!-- Cart Section -->
-      <div id="cartSection" class="section hidden">
-        <button class="back-btn" id="backToProductsCart">
-          <i class="fas fa-arrow-left"></i> Geri
-        </button>
+      <div id="cartSection" class="section">
+        <button class="back-btn" id="backToProductsCart"><i class="fas fa-arrow-left"></i> Geri</button>
         <h2 class="section-title">Səbət</h2>
         <div class="cart-content">
           <div class="cart-items" id="cartItems"></div>
           <div class="cart-summary">
-            <h3>Sifariş məlumatları</h3>
-            <div class="summary-row">
-              <span>Məhsul sayı:</span>
-              <span id="cartItemCount">0</span>
-            </div>
-            <div class="summary-row">
-              <span>Ümumi məbləğ:</span>
-              <span id="cartTotalAmount">0₼</span>
-            </div>
-            <div class="summary-row total">
-              <span>Cəmi:</span>
-              <span id="cartTotal">0₼</span>
-            </div>
+            <h3>Sifariş</h3>
+            <div class="summary-row"><span>Say:</span><span id="cartItemCount">0</span></div>
+            <div class="summary-row"><span>Məbləğ:</span><span id="cartTotalAmount">0₼</span></div>
+            <div class="summary-row total"><span>Cəmi:</span><span id="cartTotal">0₼</span></div>
             <button class="checkout-btn">Sifarişi tamamla</button>
           </div>
         </div>
@@ -103,31 +75,25 @@
     </div>
   </main>
 
-  <!-- Products -->
   <div class="modal" id="productModal">
     <div class="modal-content">
-
-      <button class="modal-close" id="modalClose">
-        <i class="fas fa-times"></i>
-      </button>
       <div class="modal-body">
         <div class="modal-images">
-          <div class="main-image">
-            <img id="modalImage" src="" alt="">
-          </div>
+          <div class="main-image"><img id="modalImage" src="" alt=""></div>
           <div class="thumbnail-images" id="thumbnailImages"></div>
         </div>
         <div class="modal-info">
           <div class="modal-header">
             <h2 id="modalTitle"></h2>
-            <button class="favorite-btn" id="modalFavoriteBtn">
-              <i class="far fa-heart"></i>
-            </button>
+            <div class="modal-actions">
+              <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+              <button class="favorite-btn" id="modalFavoriteBtn"><i class="far fa-heart"></i></button>
+            </div>
           </div>
           <div class="modal-rating">
             <span class="stars" id="modalStars"></span>
-            <span class="rating-count" id="modalRatingCount"></span>
-            <span class="location" id="modalLocation"></span>
+            <span id="modalRatingCount"></span>
+            <span id="modalLocation"></span>
           </div>
           <div class="modal-price">
             <span class="current-price" id="modalPrice"></span>
@@ -138,35 +104,10 @@
             <h3>Məhsul haqqında</h3>
             <p id="modalDescription"></p>
           </div>
-          <div class="modal-features">
-            <div class="feature">
-              <i class="fas fa-shield-alt"></i>
-              <div>
-                <h4>Alıcı Müdafiəsi</h4>
-                <p>Məhsul təsvirə uyğun deyilsə, tam geri ödəmə. Əmin olun.</p>
-              </div>
-            </div>
-            <div class="feature">
-              <i class="fas fa-truck"></i>
-              <div>
-                <h4>Sürətli Çatdırılma</h4>
-                <p>50₼-dən yuxarı sifarişlərdə pulsuz çatdırılma. Real vaxt izləmə.</p>
-              </div>
-            </div>
-          </div>
           <div class="modal-details">
-            <div class="detail-row">
-              <span>Brend</span>
-              <strong id="modalBrand"></strong>
-            </div>
-            <div class="detail-row">
-              <span>Kateqoriya</span>
-              <strong id="modalCategory"></strong>
-            </div>
-            <div class="detail-row">
-              <span>Stok</span>
-              <strong id="modalStock"></strong>
-            </div>
+            <div class="detail-row"><span>Brend</span><strong id="modalBrand"></strong></div>
+            <div class="detail-row"><span>Kateqoriya</span><strong id="modalCategory"></strong></div>
+            <div class="detail-row"><span>Stok</span><strong id="modalStock"></strong></div>
           </div>
           <button class="add-to-cart-btn" id="addToCartBtn">Səbətə əlavə et</button>
         </div>
@@ -179,78 +120,8 @@
     <span id="toastMessage"></span>
   </div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-features">
-        <div class="footer-feature">
-          <div class="feature-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <h3>Alıcı Müdafiəsi</h3>
-          <p>Məhsul təsvirə uyğun deyilsə, tam geri ödəmə. Əmin olun.</p>
-        </div>
-        <div class="footer-feature">
-          <div class="feature-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <h3>Təsdiqlənmiş Satıcılar</h3>
-          <p>Bütün satıcılar şəxsiyyət və biznes sənədləri ilə təsdiqlənib.</p>
-        </div>
-        <div class="footer-feature">
-          <div class="feature-icon">
-            <i class="fas fa-shipping-fast"></i>
-          </div>
-          <h3>Sürətli Çatdırılma</h3>
-          <p>50₼-dən yuxarı sifarişlərdə pulsuz çatdırılma. Real vaxt izləmə.</p>
-        </div>
-      </div>
+    
 
-      <div class="footer-links">
-        <div class="footer-column">
-          <div class="footer-logo">
-            <div class="logo-icon">G</div>
-            <span class="logo-text">GadgetBazar</span>
-          </div>
-          <p>Dünyanın ən böyük gadget bazarı. Texnologiyanı əlçatan alın və satın.</p>
-        </div>
-        <div class="footer-column">
-          <h4>Bazar</h4>
-          <ul>
-            <li><a href="#">Elanları Gaz</a></li>
-            <li><a href="#">Gadgetinizi Satın</a></li>
-            <li><a href="#">Populyar</a></li>
-            <li><a href="#">Top Satıcılar</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h4>Dəstək</h4>
-          <ul>
-            <li><a href="#">Kömək Mərkəzi</a></li>
-            <li><a href="#">Təhlükəsizlik Məsləhətləri</a></li>
-            <li><a href="#">Çatdırılma</a></li>
-            <li><a href="#">Qaytarma</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h4>Şirkət</h4>
-          <ul>
-            <li><a href="#">Haqqımızda</a></li>
-            <li><a href="#">Karyera</a></li>
-            <li><a href="#">Mətbuat</a></li>
-            <li><a href="#">Şərtlər</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>© 2026 GadgetBazar. Bütün hüquqlar qorunur.</p>
-      </div>
-    </div>
-  </footer>
-
-
+  <script src="app.js"></script>
 </body>
-<script app.js></script>
-
 </html>
